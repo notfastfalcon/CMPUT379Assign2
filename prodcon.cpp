@@ -5,11 +5,6 @@
 #include "header.h"
 using namespace std;
 
-void input(int argc, char *argv[]) {
-	
-}
-
-
 int main (int argc, char *argv[]) {
 	int nthreads = 0, tid = 0;
 	string outFile = "prodcon.log";
@@ -22,7 +17,7 @@ int main (int argc, char *argv[]) {
 	if (tid != 0) {
 		outFile = "prodcon." + to_string(tid) + ".log";
 	}
+	loggedToFile(outFile);
 
-	cout<< outFile << "\n";
 	return 0;
 }
