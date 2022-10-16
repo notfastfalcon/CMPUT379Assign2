@@ -7,7 +7,7 @@
 using namespace std;
 
 int main (int argc, char *argv[]) {
-	//defaults values
+	//default values
 	int nthreads = 0, tid = 0;
 	string outFile = "prodcon.log";
 
