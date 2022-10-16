@@ -1,11 +1,10 @@
 CC = g++
 C = gcc
-CFLAGS = -Wall -O2
 
 all: prodcon
 
 prodcon: prodcon.o utility.o tands.o
-	$(CC) prodcon.o utility.o tands.o -o prodcon
+	$(CC) -pthread prodcon.o utility.o tands.o -o prodcon
 
 prodcon.o: prodcon.cpp header.h tands.c
 	$(CC) -c prodcon.cpp -o prodcon.o
