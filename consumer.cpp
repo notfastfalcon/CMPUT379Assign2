@@ -1,8 +1,10 @@
-#include "iostream"
-#include "string.h"
-#include "queue"
+#include "stdio.h"
+#include "stdlib.h"
+#include "unistd.h"
 #include "pthread.h"
-#include "bits/stdc++.h"
 #include "header.h"
 using namespace std;
 
+void* consume(void* args_p) {
+	
+}

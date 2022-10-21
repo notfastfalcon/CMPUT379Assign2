@@ -6,6 +6,13 @@
 #include "header.h"
 using namespace std;
 
+void operations(int nthreads, string outFile) {
+	// work queue.. no size restrictions yet, implemented later in code
+	queue<string> workQueue;
+
+
+}
+
 int main (int argc, char *argv[]) {
 	//default values
 	int nthreads = 0, tid = 0;
@@ -25,9 +32,8 @@ int main (int argc, char *argv[]) {
 	if (tid != 0) {
 		outFile = "prodcon." + to_string(tid) + ".log";
 	}
-	loggedToFile(outFile);
-
-	//consumer();
+	
+	operations(nthreads, outFile);
 
 	return 0;
 }
