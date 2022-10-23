@@ -9,15 +9,18 @@ using namespace std;
 extern void Trans(int n);
 extern void Sleep(int n);
 
-void operations(int nthreads, string outFile) {
+unsigned int workCount = 0;
+
+void operations(int nthreads) {
 	// work queue.. no size restrictions yet, implemented later in code
 	queue<string> workQueue;
 
 	//creating threads
 	pthread_t threads[nthreads];
 
-	//the use of an array to store the ids was done to avoid 'id' from going out of scope
-	//Inspired from StackOverFlow Code. Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
+	//the use of an array to store the ids was done to avoid losing 'id', as it goes out of scope and all
+	//threads are assigned an id = nthreads. Inspired from StackOverFlow Code. 
+	//Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
 	unsigned int threadID[nthreads];
 	for (int id = 0; id < nthreads; id++) {
 		threadID[id] = id;
@@ -63,7 +66,8 @@ int main (int argc, char *argv[]) {
 		outFile = "prodcon." + to_string(tid) + ".log";
 	}
 	loggedToFile(outFile);
-	operations(nthreads, outFile);
+	operations(nthreads);
+	summaryOutput(nthreads);
 	exit(0);
 
 	return 0;
