@@ -4,7 +4,6 @@
 #include "pthread.h"
 #include "bits/stdc++.h"
 #include "header.h"
-#include "tands.cpp"
 using namespace std;
 
 extern void Trans(int n);
@@ -14,28 +13,32 @@ void operations(int nthreads, string outFile) {
 	// work queue.. no size restrictions yet, implemented later in code
 	queue<string> workQueue;
 
-
 	//creating threads
 	pthread_t threads[nthreads];
+
+	//the use of an array to store the 
+	unsigned int threadID[nthreads];
 	for (int id = 0; id < nthreads; id++) {
+		threadID[id] = id;
 		//passing id as *arg to assign id to threads
-		pthread_create(&threads[nthreads], NULL, consume, &id);
+		pthread_create(&threads[nthreads], NULL, consume, &threadID[id]);
 	}
 
 
 	string workCommand;
-	int cmdType = -1;
+	int cmdType;
 
 	while(getline(cin, workCommand)) {
 		cmdType = getCommandType(workCommand);
-		switch (cmdType) {
-			case 0:
+		if(cmdType == 0) {
 				Trans(stoi(workCommand.substr(1)));
-			case 1:
+			}
+		else if(cmdType == 1) {
 				Sleep(stoi(workCommand.substr(1)));
-			case -1:
+			}
+		else {
 				cout << "Invalid Command\n";
-		}
+			}
 	}
 }
 
@@ -60,6 +63,7 @@ int main (int argc, char *argv[]) {
 	}
 	loggedToFile(outFile);
 	operations(nthreads, outFile);
+	exit(0);
 
 	return 0;
 }

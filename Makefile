@@ -15,4 +15,4 @@ tands.o: tands.cpp
 
 # Clean
 clean: 
-	rm -f *.o prodcon
+	rm -f *.o *.log prodcon

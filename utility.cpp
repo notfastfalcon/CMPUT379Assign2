@@ -9,7 +9,6 @@ using namespace std;
 
 void* consume(void* args_p) {
 	int* threadID = (int*) args_p; 
-	cout << "Hello from threadID" << "\t" << threadID << "\n";
     return NULL;
 }
 
