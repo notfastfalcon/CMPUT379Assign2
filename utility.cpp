@@ -48,7 +48,7 @@ int getCommandType(string workCommand) {
 
 // initialize the vector after threads are created, before any work is assigned
 void initWorkPerThread(int nthreads) {
-	for(int i = 0; i < nthreads; i++) {
+	for(int i = 1; i <= nthreads; i++) {
 		//initially work done by each thread is 0
 		workPerThread.push_back(0);
 	}
@@ -69,7 +69,7 @@ void summaryOutput(int nthreads) {
 	cout << "Receive\t"<< receive << "\n";
 	cout << "Complete\t"<< complete << "\n";
 	cout << "Sleep\t"<< sleepCount << "\n";
-	for (int i = 0; i < nthreads; i++) {
+	for (int i = 1; i <= nthreads; i++) {
 		cout << "Thread  " << i << "     " << workPerThread[i] <<"\n"; 
 	}
 	if (timeCount > 0.0) {

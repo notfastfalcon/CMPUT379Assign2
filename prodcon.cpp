@@ -22,7 +22,7 @@ void operations(int nthreads) {
 	//threads are assigned an id = nthreads. Inspired from StackOverFlow Code. 
 	//Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
 	unsigned int threadID[nthreads];
-	for (int id = 0; id < nthreads; id++) {
+	for (int id = 1; id <= nthreads; id++) {
 		threadID[id] = id;
 		//passing id as *arg to assign id to threads
 		pthread_create(&threads[nthreads], NULL, consume, &threadID[id]);
