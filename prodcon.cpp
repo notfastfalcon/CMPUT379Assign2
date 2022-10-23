@@ -16,7 +16,8 @@ void operations(int nthreads, string outFile) {
 	//creating threads
 	pthread_t threads[nthreads];
 
-	//the use of an array to store the 
+	//the use of an array to store the ids was done to avoid 'id' from going out of scope
+	//Inspired from StackOverFlow Code. Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
 	unsigned int threadID[nthreads];
 	for (int id = 0; id < nthreads; id++) {
 		threadID[id] = id;
