@@ -3,14 +3,10 @@
 
 #include "string"
 
-// Producer Functions
-void* produce(void*);
-
-// Consumer Functions
-void* consume(void*);
-
 // Utility Functions
+void* consume(void*);
 void loggedToFile(std::string);
+int getCommandType(std::string);
 
 // Prodcon Functions
 void operations(int, std::string);

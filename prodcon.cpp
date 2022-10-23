@@ -4,13 +4,39 @@
 #include "pthread.h"
 #include "bits/stdc++.h"
 #include "header.h"
+#include "tands.cpp"
 using namespace std;
+
+extern void Trans(int n);
+extern void Sleep(int n);
 
 void operations(int nthreads, string outFile) {
 	// work queue.. no size restrictions yet, implemented later in code
 	queue<string> workQueue;
 
 
+	//creating threads
+	pthread_t threads[nthreads];
+	for (int id = 0; id < nthreads; id++) {
+		//passing id as *arg to assign id to threads
+		pthread_create(&threads[nthreads], NULL, consume, &id);
+	}
+
+
+	string workCommand;
+	int cmdType = -1;
+
+	while(getline(cin, workCommand)) {
+		cmdType = getCommandType(workCommand);
+		switch (cmdType) {
+			case 0:
+				Trans(stoi(workCommand.substr(1)));
+			case 1:
+				Sleep(stoi(workCommand.substr(1)));
+			case -1:
+				cout << "Invalid Command\n";
+		}
+	}
 }
 
 int main (int argc, char *argv[]) {
@@ -32,7 +58,7 @@ int main (int argc, char *argv[]) {
 	if (tid != 0) {
 		outFile = "prodcon." + to_string(tid) + ".log";
 	}
-	
+	loggedToFile(outFile);
 	operations(nthreads, outFile);
 
 	return 0;
