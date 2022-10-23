@@ -6,9 +6,9 @@
 
 // Utility Functions
 void* consume(void*);
-void addToProcessTable(std::vector<std::string>);
 void loggedToFile(std::string);
 int getCommandType(std::string);
+void initWorkPerThread(int);
 void operationOutput(void);
 void summaryOutput(int);
 

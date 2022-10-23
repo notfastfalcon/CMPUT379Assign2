@@ -5,20 +5,24 @@
 #include "fcntl.h"
 #include "unistd.h"
 #include "vector"
+#include "cmath"
 #include "header.h"
 using namespace std;
 
-vector<vector<string>> processTable;
+//counters for summary
+unsigned int work = 0, ask = 0, receive = 0, complete = 0, sleepCount = 0;
+//total exec time
+float timeCount = 0.000;
+//saving work done by each thread
+vector<int> workPerThread;
 
+//thread function
 void* consume(void* args_p) {
 	int* threadID = (int*) args_p; 
     return NULL;
 }
 
-void addToProcessTable(vector<string> workEntry) {
-	processTable.push_back(workEntry);
-}
-
+//redirects output to log file
 void loggedToFile(string filename) {
 	int outfd;
 	// 0666 was included to give rw permission
@@ -29,6 +33,7 @@ void loggedToFile(string filename) {
 	close(outfd);
 }
 
+//gets the command type entered
 int getCommandType(string workCommand) {
 	//default case handling
 	int type = -1;
@@ -41,28 +46,38 @@ int getCommandType(string workCommand) {
 	return type;
 }
 
-void operationOutput() {
-	//TODO: print these values as we go with the operations.
-	//Add output to vector and send a vector for each op to addToProcessTable().
+// initialize the vector after threads are created, before any work is assigned
+void initWorkPerThread(int nthreads) {
+	for(int i = 0; i < nthreads; i++) {
+		//initially work done by each thread is 0
+		workPerThread.push_back(0);
+	}
 }
 
+//prints the output of each operation
+void operationOutput() {
+	//TODO: print these values as we go with the operations.
+	//Update the global variables everytime.
+	//add to workPerThread (workPerThread[id] ++);
+}
+
+//final summary output
 void summaryOutput(int nthreads) {
-	int work = 0, ask = 0, receive = 0, complete = 0, sleep = 0;
-	//TODO: Calculation for all the above
 	cout << "Summary:\n";
 	cout << "Work\t"<< work << "\n";
 	cout << "Ask\t"<< ask << "\n";
 	cout << "Receive\t"<< receive << "\n";
 	cout << "Complete\t"<< complete << "\n";
-	cout << "Sleep\t"<< sleep << "\n";
+	cout << "Sleep\t"<< sleepCount << "\n";
 	for (int i = 0; i < nthreads; i++) {
-		int threadWork = 0;
-		//TODO: calculation for threadWork
-		cout << "Thread  " << i << "     " << threadWork <<"\n"; 
+		cout << "Thread  " << i << "     " << workPerThread[i] <<"\n"; 
 	}
-
-	//TODO: transPerSec = (1/final time)*TotalWorkDone
-	float transPerSec = 0;
-	cout << "Transactions per second: " << transPerSec << "\n";
+	if (timeCount > 0.0) {
+		float transPerSec = (1/timeCount) * work;
+		cout << "Transactions per second: " << round(transPerSec*100.0)/100.0 << "\n";
+	}
+	else {
+		cout << "Transactions per second: N.A.\n";
+	}
 
 }

@@ -28,6 +28,8 @@ void operations(int nthreads) {
 		pthread_create(&threads[nthreads], NULL, consume, &threadID[id]);
 	}
 
+	// init vector to store work done by each thread
+	initWorkPerThread(nthreads);
 
 	string workCommand;
 	int cmdType;
