@@ -72,7 +72,11 @@ void operations(int nthreads) {
 		}
 		else if(cmdType == 1) {
 			try {
-				Sleep(stoi(workCommand.substr(1)));
+				int n = stoi(workCommand.substr(1));
+				Sleep(n);
+				pthread_mutex_lock(&queueMutex);
+				outputAndCalculation(0, "Sleep", workCount, n);
+				pthread_mutex_unlock(&queueMutex);
 			}
 			catch(...) {
 				cout << "Invalid arguments\n";

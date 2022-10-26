@@ -14,7 +14,7 @@ using namespace std;
 //counters for summary
 unsigned int work = 0, ask = 0, receive = 0, complete = 0, sleepCount = 0;
 //start value of time
-clock_t start;
+clock_t startTime;
 //total work execution time till now
 float totalExecTime;
 //saving work done by each thread
@@ -22,7 +22,7 @@ vector<int> workPerThread;
 
 //starts the timer for program execution
 void startTimer() {
-	start = clock();
+	startTime = clock();
 }
 
 //redirects output to log file
@@ -51,7 +51,7 @@ int getCommandType(string workCommand) {
 
 // initialize the vector after threads are created, before any work is assigned
 void initWorkPerThread(int nthreads) {
-	for(int i = 0; i < nthreads; i++) {
+	for(int i = 1; i <= nthreads; i++) {
 		//initially work done by each thread is 0
 		workPerThread.push_back(0);
 	}
@@ -60,17 +60,20 @@ void initWorkPerThread(int nthreads) {
 
 //prints the output of each operation and updates all global counts and times
 void outputAndCalculation(int id, string event, unsigned int workCount, int n) {
-	totalExecTime = double((clock() - start) / CLOCKS_PER_SEC);
+	totalExecTime = float(clock() - startTime) / float(CLOCKS_PER_SEC);
 	//printing upto 3 decimal places
 	printf("%.3f", totalExecTime); 
-	cout << "  ID= " << id;
+	cout << " ID= " << id;
 
-	if (event == "Ask") {
-		ask++;
-		cout << "\t" << event << "\n";
+	if (event == "Ask" || event == "End") {
+		cout << "\t " << event << "\n";
+		if (event == "Ask"){
+			ask++;
+		}
+		
 	}
 	else if (event == "Work" || event == "Receive") {	
-		cout << "  Q= " << workCount << "  " << event << "\t" << n << "\n";
+		cout << " Q= " << workCount << " " << event << "\t" << n << "\n";
 		if (event == "Work") {
 			work++;
 		}
@@ -79,17 +82,14 @@ void outputAndCalculation(int id, string event, unsigned int workCount, int n) {
 		}
 	}
 	else {
-		cout << "\t" << event << "\t" << n <<"\n"; 
+		cout << "\t " << event << "\t" << n <<"\n"; 
 		if (event == "Sleep") {
 			sleepCount++;
 		}
-		else if (event == "Complete") {
+		else {
 			complete++;
 			//count how much work is done by each thread
 			workPerThread[id]++;
-		}
-		else{
-			//this is the end event so we do nothing
 		}
 	}
 }
@@ -102,12 +102,13 @@ void summaryOutput(int nthreads) {
 	cout << "Receive\t\t"<< receive << "\n";
 	cout << "Complete\t"<< complete << "\n";
 	cout << "Sleep\t\t"<< sleepCount << "\n";
-	for (int i = 0; i < nthreads; i++) {
-		cout << "Thread " << i+1 << "\t" << workPerThread[i] <<"\n"; 
+	for (int i = 1; i <= nthreads; i++) {
+		cout << "Thread " << i << "\t" << workPerThread[i] <<"\n"; 
 	}
 	if (totalExecTime > 0.0) {
 		float transPerSec = (1/totalExecTime) * work;
-		cout << "Transactions per second: " << round(transPerSec*100.0)/100.0 << "\n";
+		cout << "Transactions per second: ";
+		printf("%.3f\n", transPerSec);
 	}
 	else {
 		cout << "Transactions per second: N.A.\n";
