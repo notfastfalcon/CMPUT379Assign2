@@ -5,15 +5,16 @@
 #include "vector"
 
 // Utility Functions
-void* consume(void*);
+void startTimer(void);
 void loggedToFile(std::string);
 int getCommandType(std::string);
 void initWorkPerThread(int);
-void operationOutput(void);
+void outputAndCalculation(int, std::string, unsigned int, int);
 void summaryOutput(int);
 
 // Prodcon Functions
 void operations(int);
+void* consumer(void*);
 
 
 #endif
