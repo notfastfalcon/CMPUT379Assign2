@@ -51,7 +51,7 @@ int getCommandType(string workCommand) {
 
 // initialize the vector after threads are created, before any work is assigned
 void initWorkPerThread(int nthreads) {
-	for(int i = 1; i <= nthreads; i++) {
+	for(int i = 0; i < nthreads; i++) {
 		//initially work done by each thread is 0
 		workPerThread.push_back(0);
 	}
@@ -93,7 +93,7 @@ void outputAndCalculation(int id, string event, unsigned int workCount, int n) {
 			cout << "\t" << n << "\n";
 			complete++;
 			//count how much work is done by each thread
-			workPerThread[id]++;
+			workPerThread[id-1]++;
 		}
 	}
 }
@@ -107,7 +107,7 @@ void summaryOutput(int nthreads) {
 	cout << "Complete\t"<< complete << "\n";
 	cout << "Sleep\t\t"<< sleepCount << "\n";
 	for (int i = 1; i <= nthreads; i++) {
-		cout << "Thread " << i << "\t" << workPerThread[i] <<"\n"; 
+		cout << "Thread " << i << "\t" << workPerThread[i-1] <<"\n"; 
 	}
 	if (totalExecTime > 0.0) {
 		float transPerSec = (1/totalExecTime) * work;
