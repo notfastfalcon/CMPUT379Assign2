@@ -1,15 +1,16 @@
 #include "iostream"
 #include "string.h"
 #include "queue"
+#include "unistd.h"
 #include "pthread.h"
 #include "bits/stdc++.h"
 #include "header.h"
 using namespace std;
 
 //MUTEX Variables
-pthread_cond_t queueCond = PTHREAD_COND_INITIALIZER;
-pthread_mutex_t queueMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_t queueCountMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t queueCapacityCond = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t queueCapacityMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t outputMutex = PTHREAD_MUTEX_INITIALIZER;
 
 //tands.cpp functions
 extern void Trans(int n);
@@ -28,55 +29,52 @@ void operations(int nthreads) {
 	//threads are assigned an id = nthreads. Inspired from StackOverFlow Code. 
 	//Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
 	unsigned int threadID[nthreads];
-	for (int id = 1; id <= nthreads; id++) {
-		threadID[id] = id;
+	for (int id = 0; id < nthreads; id++) {
+		threadID[id] = id + 1;
 		//passing id as *args_p to assign id to threads
-		pthread_create(&threads[nthreads], NULL, consumer, &threadID[id]);
+		pthread_create(&threads[id], NULL, consumer, &threadID[id]);
 	}
-
+	
 	// init vector to store work done by each thread
 	initWorkPerThread(nthreads);
 
 	string workCommand;
 	int cmdType;
-	while(getline(cin, workCommand)) {
+	while(getline(cin, workCommand)){
 		cmdType = getCommandType(workCommand);
 		if(cmdType == 0) {
-			int n = 0;
 			try {
-				n = stoi(workCommand.substr(1));
+				int n = stoi(workCommand.substr(1));
+				pthread_mutex_lock(&queueCapacityMutex);
+				if (workCount > queueLimit) {
+					//signal and wait for consumer to consume
+					pthread_cond_wait(&queueCapacityCond, &queueCapacityMutex);
+				}
+				else {
+					//add work to queue to consume
+					workQueue.push(n);
+					workCount++;
+					//signal consumer that work has been added
+					pthread_cond_signal(&queueCapacityCond);
+					pthread_mutex_unlock(&queueCapacityMutex);
+					pthread_mutex_lock(&outputMutex);
+					outputAndCalculation(0, "Work", workCount, n);
+					pthread_mutex_unlock(&outputMutex);
+				}
 			}
 			catch(...) {
 				cout << "Invalid arguments\n";
 			}
-
-			//adding work to queue
-			pthread_mutex_lock(&queueMutex);
-			if (workCount > queueLimit) {
-				//log ask using n as -1 as 'n' does not exist for ask
-				outputAndCalculation(*threadID, "Ask", workCount, n);
-				//wait for consumer to consume
-				pthread_cond_wait(&queueCond, &queueMutex);
-			}
-			else {
-				//add work to queue to consume
-				pthread_mutex_lock(&queueCountMutex);
-				workQueue.push(n);
-				workCount++;
-				pthread_mutex_unlock(&queueCountMutex);
-				//signal consumer that work has been added
-				pthread_cond_signal(&queueCond);
-				outputAndCalculation(0, "Work", workCount, n);
-			}
-			pthread_mutex_unlock(&queueMutex);
 		}
 		else if(cmdType == 1) {
 			try {
+				pthread_mutex_lock(&queueCapacityMutex);
 				int n = stoi(workCommand.substr(1));
 				Sleep(n);
-				pthread_mutex_lock(&queueMutex);
+				pthread_mutex_unlock(&queueCapacityMutex);
+				pthread_mutex_lock(&outputMutex);
 				outputAndCalculation(0, "Sleep", workCount, n);
-				pthread_mutex_unlock(&queueMutex);
+				pthread_mutex_unlock(&outputMutex);
 			}
 			catch(...) {
 				cout << "Invalid arguments\n";
@@ -86,39 +84,47 @@ void operations(int nthreads) {
 			cout << "Invalid commands\n";
 		}
 	}
-	pthread_mutex_lock(&queueMutex);
+	pthread_mutex_lock(&outputMutex);
 	outputAndCalculation(0, "End", workCount, -1);
-	pthread_mutex_unlock(&queueMutex);
+	pthread_mutex_unlock(&outputMutex);
+
+	for (int i = 0; i < nthreads; i++) {
+		pthread_join(threads[i], NULL);
+	}
+	
 }
 
 //consumer thread functions
 void* consumer(void* args_p) {
 	int* threadID = (int*) args_p;
-	int n = 0;
-	pthread_mutex_lock(&queueMutex);
+	pthread_mutex_lock(&queueCapacityMutex);
 	if (workCount == 0) {
 		//log ask using n as -1 as 'n' does not exist for ask
+		pthread_mutex_lock(&outputMutex);
 		outputAndCalculation(*threadID, "Ask", workCount, -1);
+		pthread_mutex_unlock(&outputMutex);
 		//wait for the producer to add work
-		pthread_cond_wait(&queueCond, &queueMutex);
+		pthread_cond_wait(&queueCapacityCond, &queueCapacityMutex);
 	}
 	else {
 		//get int value from queue (FIFO) and removing from active work count
-		pthread_mutex_lock(&queueCountMutex);
-		n = workQueue.front();
+		int n = workQueue.front();
 		workQueue.pop();
 		workCount--;
-		pthread_mutex_unlock(&queueCountMutex);
+		pthread_mutex_unlock(&queueCapacityMutex);
 		//signal that element from queue was removed
-		pthread_cond_signal(&queueCond);
+		pthread_cond_signal(&queueCapacityCond);
 		//command received
+		pthread_mutex_lock(&outputMutex);
 		outputAndCalculation(*threadID, "Receive", workCount, n);
+		pthread_mutex_unlock(&outputMutex);
 		//execute command
 		Trans(n);
 		//command completed
+		pthread_mutex_lock(&outputMutex);
 		outputAndCalculation(*threadID, "Complete", workCount, n);
+		pthread_mutex_unlock(&outputMutex);
 	}
-	pthread_mutex_unlock(&queueMutex);
     return NULL;
 }
 
@@ -154,7 +160,9 @@ int main (int argc, char *argv[]) {
 	//threads operations
 	operations(nthreads);
 	//print the summary
+	pthread_mutex_lock(&outputMutex);
 	summaryOutput(nthreads);
+	pthread_mutex_unlock(&outputMutex);
 	exit(0);
 	return 0;
 }

@@ -1,4 +1,4 @@
-CC = g++
+CC = g++ -O
 
 # optimization 
 execute: prodcon.o utility.o tands.o utility.o

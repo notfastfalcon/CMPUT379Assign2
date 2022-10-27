@@ -73,20 +73,24 @@ void outputAndCalculation(int id, string event, unsigned int workCount, int n) {
 		
 	}
 	else if (event == "Work" || event == "Receive") {	
-		cout << " Q= " << workCount << " " << event << "\t" << n << "\n";
+		cout << " Q= " << workCount << " " << event;
 		if (event == "Work") {
+			cout << "\t\t" << n << "\n";
 			work++;
 		}
 		else {
+			cout << "\t" << n << "\n";
 			receive++;
 		}
 	}
 	else {
-		cout << "\t " << event << "\t" << n <<"\n"; 
+		cout << "\t " << event; 
 		if (event == "Sleep") {
+			cout << "\t\t" << n << "\n";
 			sleepCount++;
 		}
 		else {
+			cout << "\t" << n << "\n";
 			complete++;
 			//count how much work is done by each thread
 			workPerThread[id]++;
@@ -108,7 +112,7 @@ void summaryOutput(int nthreads) {
 	if (totalExecTime > 0.0) {
 		float transPerSec = (1/totalExecTime) * work;
 		cout << "Transactions per second: ";
-		printf("%.3f\n", transPerSec);
+		printf("%.2f\n", transPerSec);
 	}
 	else {
 		cout << "Transactions per second: N.A.\n";
