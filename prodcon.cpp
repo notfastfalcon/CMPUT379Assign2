@@ -24,7 +24,7 @@ queue<int> workQueue;
 //boolean variable to track progress
 bool done = false;
 
-void operations(int nthreads) {
+void producer(int nthreads) {
 	//creating threads
 	pthread_t threads[nthreads];
 
@@ -86,14 +86,16 @@ void operations(int nthreads) {
 			cout << "Invalid commands\n";
 		}
 	}
-
 	pthread_mutex_lock(&outputMutex);
 	outputAndCalculation(0, "End", workCount, -1);
 	pthread_mutex_unlock(&outputMutex);
 
+	while(workCount > 0) {
+		pthread_cond_broadcast(&queueFullCond);
+	}
+
 	done = true;
 	for (int i = 0; i < nthreads; i++) {
-		pthread_cond_signal(&queueFullCond);
 		pthread_join(threads[i], NULL);
 	}
 	
@@ -167,8 +169,8 @@ int main (int argc, char *argv[]) {
 	}
 	//log every STDOUT to file
 	loggedToFile(outFile);
-	//threads operations
-	operations(nthreads);
+	//producer operations
+	producer(nthreads);
 	//print the summary
 	pthread_mutex_lock(&outputMutex);
 	summaryOutput(nthreads);
