@@ -16,5 +16,4 @@ void summaryOutput(int);
 void producer(int);
 void* consumer(void*);
 
-
 #endif
