@@ -22,7 +22,9 @@ Makefile Targets:
 
 
 Code Design:
-	1. 
+	1. prodon is responsible for creating consumers and handling different producer consumer operations
+	2. utility is responsible for handling logging data, time calculations and other utilties to support main program
+	3. tands handles the two kinds of jobs that producer and consumer undertake (provided as starterCode)
 	4. This code compiles on lab machines.
 
 Acknowledgement:
