@@ -1,19 +1,17 @@
 CC = g++ -O
-DCC = g++ -g
 
 # optimization 
 execute: prodcon.o utility.o tands.o header.h
-	$(CC) -pthread prodcon.o utility.o tands.o -o prodcon
+	$(CC)  -o prodcon prodcon.o utility.o tands.o -lpthread
 
-prodcon.o: prodcon.cpp header.h 
-	$(CC) -c prodcon.cpp -o prodcon.o
+prodcon.o: prodcon.cpp tands.o utility.o header.h 
+	$(CC) -c prodcon.cpp 
 
 utility.o: utility.cpp header.h
-	$(CC) -c utility.cpp -o utility.o
+	$(CC) -c utility.cpp 
 
 tands.o: tands.cpp
-	$(CC) -c tands.cpp -o tands.o
-
+	$(CC) -c tands.cpp 
 
 # Clean
 clean: 
