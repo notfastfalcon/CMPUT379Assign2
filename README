@@ -1,0 +1,29 @@
+#-----------------------------------------------
+#	Name: Arsh Narkhede
+#	ID: 1645106
+#	CMPUT 379, Fall 2022
+#	Assignment #2: Producer-Consumer Problem
+#-----------------------------------------------
+
+Included Files:
+	> prodcon.cpp
+	> tands.cpp
+	> utility.cpp
+	> header.h
+	> Makefile
+	> README
+
+Makefile Targets:
+	- execute: links all object files and creates an executable prodcon
+	- prodcon.o: builds the prodcon object file
+	- tands.o: builds the tands object file
+	- utility.o: builds the utility object file
+	- clean: removes all executables, log files and object files in the current directory.
+
+
+Code Design:
+	1. 
+	4. This code compiles on lab machines.
+
+Acknowledgement:
+	> creating multiple threads: Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop
