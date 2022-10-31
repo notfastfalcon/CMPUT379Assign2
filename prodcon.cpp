@@ -90,10 +90,10 @@ void* consumer(void* args_p) {
 			hasWork = true;
 		}
 		pthread_mutex_unlock(&queueMutex);
+		//post for producer to know that space was generated
+		sem_post(&queueEmpty);
 		//if there was work received by consumer then do following
 		if(hasWork) {
-			//post for producer to know that space was generated
-			sem_post(&queueEmpty);
 			//command was received
 			pthread_mutex_lock(&outputMutex);
 			outputAndCalculation(*threadID, "Receive", workCount, n);
