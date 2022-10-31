@@ -23,73 +23,81 @@ queue<int> workQueue;
 //boolean variable to track progress
 bool done = false;
 
-void producer(int nthreads) {
+void producer() {
 	string workCommand;
 	int cmdType;
 	while(getline(cin, workCommand)) {
 		//input is guaranteed to be correctly formatted, so no try catch block implemented
 		cmdType = getCommandType(workCommand);
+		// If command is 'T'
 		if(cmdType == 0) {
+			int n = stoi(workCommand.substr(1));
+			//wait until empty space
 			sem_wait(&queueEmpty);
 			pthread_mutex_lock(&queueMutex);
 			//add work to queue to consume
-			int n = stoi(workCommand.substr(1));
 			workQueue.push(n);
 			int workCount = workQueue.size();
 			pthread_mutex_unlock(&queueMutex);
-			//signal atleast one consumer that work has been added
-			sem_post(&queueFull);
-			pthread_mutex_lock(&outputMutex);			
+			pthread_mutex_lock(&outputMutex);	
 			outputAndCalculation(0, "Work", workCount, n);
 			pthread_mutex_unlock(&outputMutex);	
+			//signal atleast one consumer that work has been added
+			sem_post(&queueFull);
 		}
+		//If command is 'S'
 		else if(cmdType == 1) {
-			
 			int n = stoi(workCommand.substr(1));
 			pthread_mutex_lock(&outputMutex);
 			outputAndCalculation(0, "Sleep", -1, n);
 			pthread_mutex_unlock(&outputMutex);
 			Sleep(n);
 		}
-		else {
-			//do nothing
-		}
 	}
+	done = true;
 	pthread_mutex_lock(&outputMutex);
 	outputAndCalculation(0, "End", -1, -1);
 	pthread_mutex_unlock(&outputMutex);
-	done = true;
-
 }
 
 //consumer thread functions
 void* consumer(void* args_p) {
+	bool work = false;
 	int* threadID = (int*) args_p;
 	while(true) {
 		pthread_mutex_lock(&outputMutex);
 		outputAndCalculation(*threadID, "Ask", -1, -1);
 		pthread_mutex_unlock(&outputMutex);
 		if(done && workQueue.size() == 0) {
+			sem_post(&queueFull);
 			break;
 		}
 		sem_wait(&queueFull);
 		pthread_mutex_lock(&queueMutex);
+		int n = -1;
+		int workCount = -1;
+		if (workQueue.size() > 0) {
+			n = workQueue.front();
+			workQueue.pop();
+			workCount = workQueue.size();
+			work = true;
+		}
 		//get int value from queue (FIFO) and removing from active work count
-		int n = workQueue.front();
-		workQueue.pop();
-		int workCount = workQueue.size();
 		pthread_mutex_unlock(&queueMutex);
 		//signal producer that space was generated
 		sem_post(&queueEmpty);
-		pthread_mutex_lock(&outputMutex);
-		outputAndCalculation(*threadID, "Receive", workCount, n);
-		pthread_mutex_unlock(&outputMutex);
-		//execute command
-		Trans(n);
-		//command completed
-		pthread_mutex_lock(&outputMutex);
-		outputAndCalculation(*threadID, "Complete", -1, n);
-		pthread_mutex_unlock(&outputMutex);
+		if(work) {
+			pthread_mutex_lock(&outputMutex);
+			outputAndCalculation(*threadID, "Receive", workCount, n);
+			pthread_mutex_unlock(&outputMutex);
+			//execute command
+			Trans(n);
+			//command completed
+			pthread_mutex_lock(&outputMutex);
+			outputAndCalculation(*threadID, "Complete", -1, n);
+			pthread_mutex_unlock(&outputMutex);
+		}
+		work = false;
 	}
     return NULL;
 }
@@ -149,7 +157,8 @@ int main (int argc, char *argv[]) {
 	}
 
 	//producer operations
-	producer(nthreads);
+	producer();
+
 
 	//wait for threads
 	for (int i = 0; i < nthreads; i++) {
@@ -166,7 +175,5 @@ int main (int argc, char *argv[]) {
 	pthread_mutex_destroy(&outputMutex);;
 	sem_destroy(&queueEmpty);
 	sem_destroy(&queueFull);
-	
-	exit(0);
 	return 0;
 }

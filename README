@@ -25,7 +25,9 @@ Code Design:
 	1. prodon is responsible for creating consumers and handling different producer consumer operations
 	2. utility is responsible for handling logging data, time calculations and other utilties to support main program
 	3. tands handles the two kinds of jobs that producer and consumer undertake (provided as starterCode)
-	4. This code compiles on lab machines.
+	4. Two Semaphores were used to make consumers wait until the buffer had some work and to make producer wait if the buffer was already at capacity.
+	Two mutexes were used to lock and unlock the queue when adding or removing work and to lock and unlock the output action.
+	5. This code compiles on lab machines.
 
 Acknowledgement:
 	> creating multiple threads: Link:https://stackoverflow.com/questions/68385607/how-to-create-multiple-pthreads-with-a-for-loop

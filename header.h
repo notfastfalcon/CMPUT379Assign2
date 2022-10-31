@@ -13,7 +13,7 @@ void outputAndCalculation(int, std::string, unsigned int, int);
 void summaryOutput(int);
 
 // Prodcon Functions
-void producer(int);
+void producer();
 void* consumer(void*);
 
 #endif
