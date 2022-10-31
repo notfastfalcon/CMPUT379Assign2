@@ -32,7 +32,7 @@ void producer() {
 		// If command is 'T'
 		if(cmdType == 0) {
 			int n = stoi(workCommand.substr(1));
-			//wait until empty space
+			//wait until there is space in queue
 			sem_wait(&queueEmpty);
 			pthread_mutex_lock(&queueMutex);
 			//add work to queue to consume
@@ -42,7 +42,7 @@ void producer() {
 			pthread_mutex_lock(&outputMutex);	
 			outputAndCalculation(0, "Work", workCount, n);
 			pthread_mutex_unlock(&outputMutex);	
-			//signal atleast one consumer that work has been added
+			//post for atleast one consumer to take work
 			sem_post(&queueFull);
 		}
 		//If command is 'S'
@@ -54,6 +54,7 @@ void producer() {
 			Sleep(n);
 		}
 	}
+	//after input is read, producer's work is done
 	done = true;
 	pthread_mutex_lock(&outputMutex);
 	outputAndCalculation(0, "End", -1, -1);
@@ -62,31 +63,38 @@ void producer() {
 
 //consumer thread functions
 void* consumer(void* args_p) {
-	bool work = false;
+	bool hasWork = false;
+	int n = -1, workCount = -1;
 	int* threadID = (int*) args_p;
 	while(true) {
+		//ask for work
 		pthread_mutex_lock(&outputMutex);
 		outputAndCalculation(*threadID, "Ask", -1, -1);
 		pthread_mutex_unlock(&outputMutex);
+		
+		//if producer is done and queue is empty, consumers can terminate
 		if(done && workQueue.size() == 0) {
+			//to wake any sleeping consumers
 			sem_post(&queueFull);
 			break;
 		}
+		//wait until queue has work
 		sem_wait(&queueFull);
 		pthread_mutex_lock(&queueMutex);
-		int n = -1;
-		int workCount = -1;
-		if (workQueue.size() > 0) {
+		//if queue has work then pop work and update variable
+		if (workQueue.size() > 0) {	
+			//get int value from queue (FIFO) and removing from active work count
 			n = workQueue.front();
 			workQueue.pop();
 			workCount = workQueue.size();
-			work = true;
+			hasWork = true;
 		}
-		//get int value from queue (FIFO) and removing from active work count
 		pthread_mutex_unlock(&queueMutex);
-		//signal producer that space was generated
-		sem_post(&queueEmpty);
-		if(work) {
+		//if there was work received by consumer then do following
+		if(hasWork) {
+			//post for producer to know that space was generated
+			sem_post(&queueEmpty);
+			//command was received
 			pthread_mutex_lock(&outputMutex);
 			outputAndCalculation(*threadID, "Receive", workCount, n);
 			pthread_mutex_unlock(&outputMutex);
@@ -97,7 +105,8 @@ void* consumer(void* args_p) {
 			outputAndCalculation(*threadID, "Complete", -1, n);
 			pthread_mutex_unlock(&outputMutex);
 		}
-		work = false;
+		//update flag
+		hasWork = false;
 	}
     return NULL;
 }
@@ -116,6 +125,7 @@ int main (int argc, char *argv[]) {
 		exit(0);
 	}
 
+	// input handling
 	nthreads = atoi(argv[1]);
 	
 	if (argc == 3) {
@@ -158,7 +168,6 @@ int main (int argc, char *argv[]) {
 
 	//producer operations
 	producer();
-
 
 	//wait for threads
 	for (int i = 0; i < nthreads; i++) {
